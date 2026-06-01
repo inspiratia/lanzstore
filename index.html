@@ -313,4 +313,352 @@
               <div class="flex justify-between"><span class="text-slate-400">Game</span><span class="font-semibold text-slate-200">{{ trackedOrder.gameTitle }}</span></div>
               <div class="flex justify-between"><span class="text-slate-400">Target Akun</span><span class="font-semibold text-slate-200">{{ trackedOrder.target }}</span></div>
               <div class="flex justify-between"><span class="text-slate-400">Item Paket</span><span class="font-semibold text-cyber-400">{{ trackedOrder.itemName }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Metode Bayar</span><span class="font-semibold text-slate-200 uppercase">{{ tr
+              <div class="flex justify-between"><span class="text-slate-400">Metode Bayar</span><span class="font-semibold text-slate-200 uppercase">{{ trackedOrder.payment }}</span></div>
+              <div class="flex justify-between border-t border-dashed border-slate-800 pt-2 text-sm">
+                <span class="text-slate-400 font-medium">Total Tagihan</span>
+                <span class="font-black text-cyber-500">{{ formatRp(trackedOrder.total) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="currentView === 'auth'" class="max-w-md mx-auto relative mt-10">
+          <div class="absolute -inset-1 bg-gradient-to-r from-cyber-500 to-cyan-500 rounded-3xl blur opacity-10"></div>
+          <div class="bg-surface border border-slate-800 rounded-3xl p-6 relative shadow-2xl space-y-6">
+            
+            <div class="flex p-1 bg-slate-950 rounded-xl">
+              <button @click="authTab = 'login'" :class="authTab === 'login' ? 'bg-surface shadow-md text-cyber-500 font-bold' : 'text-slate-400'" class="flex-1 py-2.5 rounded-lg text-xs transition-all">Masuk Akun</button>
+              <button @click="authTab = 'register'" :class="authTab === 'register' ? 'bg-surface shadow-md text-cyber-500 font-bold' : 'text-slate-400'" class="flex-1 py-2.5 rounded-lg text-xs transition-all">Daftar Baru</button>
+            </div>
+
+            <div v-if="authTab === 'login'" class="space-y-4">
+              <div>
+                <label class="text-xs font-semibold text-slate-400 mb-1 block">Alamat Email</label>
+                <input v-model="loginForm.email" type="email" placeholder="contoh@email.com" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none neon-border text-slate-200">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-slate-400 mb-1 block">Kata Sandi</label>
+                <input v-model="loginForm.password" type="password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none neon-border text-slate-200">
+              </div>
+              <button @click="handleLogin" :disabled="authLoading" class="w-full bg-cyber-500 hover:bg-cyber-600 text-darkspace font-heading font-black py-3.5 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2 mt-2">
+                <span v-if="authLoading" class="animate-spin" v-html="icon('loader', 18)"></span>
+                <span>Masuk ke Dashboard</span>
+              </button>
+            </div>
+
+            <div v-else class="space-y-4">
+              <div>
+                <label class="text-xs font-semibold text-slate-400 mb-1 block">Nama Lengkap</label>
+                <input v-model="regForm.name" type="text" placeholder="Fulan Gamers" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none neon-border text-slate-200">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-slate-400 mb-1 block">Alamat Email</label>
+                <input v-model="regForm.email" type="email" placeholder="contoh@email.com" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none neon-border text-slate-200">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-slate-400 mb-1 block">Kata Sandi</label>
+                <input v-model="regForm.password" type="password" placeholder="Minimal 6 karakter" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none neon-border text-slate-200">
+              </div>
+              <button @click="handleRegister" :disabled="authLoading" class="w-full bg-gradient-to-r from-cyber-600 to-cyan-400 text-darkspace font-heading font-black py-3.5 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2 mt-2">
+                <span v-if="authLoading" class="animate-spin" v-html="icon('loader', 18)"></span>
+                <span>Buat Akun Member</span>
+              </button>
+            </div>
+
+            <div v-if="isPreview" class="pt-4 border-t border-slate-800 text-center">
+              <p class="text-[10px] text-slate-500 mb-2">Akses Cepat (Mode Demo)</p>
+              <button @click="loginForm.email='member@lanzstore.tech'; loginForm.password='123456'; handleLogin()" class="text-xs text-cyber-400 hover:underline font-semibold bg-cyber-500/5 px-4 py-2 rounded-xl border border-cyber-500/10 w-full">Masuk Otomatis sebagai Member Demo</button>
+            </div>
+
+          </div>
+        </div>
+
+      </Transition>
+    </main>
+
+    <footer class="bg-slate-950 border-t border-slate-900 py-6 px-4 text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p>&copy; 2026 <span class="font-bold text-slate-400">LanzStore Engine</span>. Seluruh hak cipta dilindungi.</p>
+        <div class="flex gap-4 text-slate-400 font-medium">
+          <a href="#" class="hover:text-cyber-500 transition">Syarat & Ketentuan</a>
+          <a href="#" class="hover:text-cyber-500 transition">Kebijakan Privasi</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+    // Dual mode auto detection pattern
+    const isPreview = !(typeof google !== 'undefined' && google.script && google.script.run);
+
+    // Mock Catalog Products based on LanzStore standard images
+    const mockGames = [
+      {
+        id: 'G1', title: 'Mobile Legends', publisher: 'Moonton', icon: 'shield', color: '#f59e0b', hasZone: true,
+        items: [
+          { id: 'I11', name: '86 Diamonds', price: 20500 },
+          { id: 'I12', name: '172 Diamonds', price: 41000 },
+          { id: 'I13', name: '257 Diamonds', price: 61500 },
+          { id: 'I14', name: '706 Diamonds', price: 164000 }
+        ]
+      },
+      {
+        id: 'G2', title: 'Free Fire', publisher: 'Garena', icon: 'zap', color: '#ef4444', hasZone: false,
+        items: [
+          { id: 'I21', name: '50 Diamonds', price: 8000 },
+          { id: 'I22', name: '140 Diamonds', price: 22000 },
+          { id: 'I23', name: '355 Diamonds', price: 54000 }
+        ]
+      },
+      {
+        id: 'G3', title: 'PUBG Mobile', publisher: 'Tencent', icon: 'box', color: '#22c55e', hasZone: false,
+        items: [
+          { id: 'I31', name: '60 Unknown Cash', price: 14500 },
+          { id: 'I32', name: '325 Unknown Cash', price: 73000 },
+          { id: 'I33', name: '660 Unknown Cash', price: 145000 }
+        ]
+      },
+      {
+        id: 'G4', title: 'Genshin Impact', publisher: 'Hoyoverse', icon: 'star', color: '#06b6d4', hasZone: true,
+        items: [
+          { id: 'I41', name: '60 Genesis Crystal', price: 15000 },
+          { id: 'I42', name: '300 Genesis Crystal', price: 75000 },
+          { id: 'I43', name: 'Blessing of the Welkin Moon', price: 79000 }
+        ]
+      },
+      {
+        id: 'G5', title: 'Valorant', publisher: 'Riot Games', icon: 'crosshair', color: '#f43f5e', hasZone: false,
+        items: [
+          { id: 'I51', name: '475 Points', price: 62000 },
+          { id: 'I52', name: '1000 Points', price: 124000 }
+        ]
+      },
+      {
+        id: 'G6', title: 'Elden Ring PC Steam', publisher: 'FromSoftware', icon: 'disc', color: '#a855f7', hasZone: false,
+        items: [
+          { id: 'I61', name: 'CD Key Global Standard', price: 740000 }
+        ]
+      }
+    ];
+
+    const mockPayments = [
+      {
+        category: 'Instant E-Wallet & QRIS',
+        list: [
+          { code: 'QRIS', name: 'QRIS All Payment', label: 'QRIS', fee: 1000 },
+          { code: 'DANA', name: 'Dana Wallet', label: 'DANA', fee: 500 },
+          { code: 'OVO', name: 'Ovo Cash', label: 'OVO', fee: 500 }
+        ]
+      },
+      {
+        category: 'Virtual Account Bank',
+        list: [
+          { code: 'BCA_VA', name: 'BCA Virtual Account', label: 'BCA', fee: 2500 },
+          { code: 'MANDIRI_VA', name: 'Mandiri Virtual Account', label: 'MANDIRI', fee: 2500 }
+        ]
+      }
+    ];
+
+    // Main Google Apps Script Run wrapper pattern
+    function gasRun(fn, mockData = null, args = null) {
+      if (isPreview) return new Promise(r => setTimeout(() => r(mockData), 500));
+      return new Promise((resolve, reject) => {
+        const runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+        if (args !== null) { runner[fn](args); } else { runner[fn](); }
+      });
+    }
+
+    createApp({
+      setup() {
+        const currentView = ref('home');
+        const authTab = ref('login');
+        const searchQuery = ref('');
+        
+        const user = ref(null);
+        const games = ref(mockGames);
+        const paymentMethods = ref(mockPayments);
+        
+        const selectedGame = ref(null);
+        
+        const orderForm = reactive({
+          userId: '', zoneId: '', itemId: '', paymentCode: '', whatsapp: ''
+        });
+
+        const loginForm = reactive({ email: '', password: '' });
+        const regForm = reactive({ name: '', email: '', password: '' });
+
+        const authLoading = ref(false);
+        const submitLoading = ref(false);
+        const trackLoading = ref(false);
+        
+        const trackInvoiceId = ref('');
+        const trackedOrder = ref(null);
+
+        const toasts = ref([]); let toastCounter = 0;
+        const pushToast = (msg, type = 'success') => {
+          const id = ++toastCounter;
+          toasts.value.push({ id, msg, type });
+          setTimeout(() => { toasts.value = toasts.value.filter(x => x.id !== id); }, 3500);
+        };
+
+        const isLoggedIn = computed(() => !!user.value);
+
+        const filteredGames = computed(() => {
+          if (!searchQuery.value) return games.value;
+          return games.value.filter(g => g.title.toLowerCase().includes(searchQuery.value.toLowerCase()));
+        });
+
+        const formatRp = (v) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v);
+
+        const selectGame = (game) => {
+          selectedGame.value = game;
+          orderForm.itemId = '';
+          orderForm.paymentCode = '';
+          currentView.value = 'topup';
+        };
+
+        const calculateTotal = (fee) => {
+          if (!selectedGame.value || !orderForm.itemId) return fee;
+          const item = selectedGame.value.items.find(i => i.id === orderForm.itemId);
+          return item ? item.price + fee : fee;
+        };
+
+        // Handlers
+        const handleLogin = async () => {
+          if (!loginForm.email || !loginForm.password) return pushToast('Semua kolom wajib diisi!', 'error');
+          authLoading.value = true;
+          try {
+            const res = await gasRun('login', { success: true, data: { name: 'Gamer Pro ID', email: loginForm.email } }, loginForm);
+            if(res.success) {
+              user.value = res.data;
+              localStorage.setItem('lanz_user', JSON.stringify(res.data));
+              pushToast(`Selamat datang kembali, ${res.data.name}! 🎮`);
+              currentView.value = 'home';
+            }
+          } finally { authLoading.value = false; }
+        };
+
+        const handleRegister = async () => {
+          if (!regForm.name || !regForm.email || !regForm.password) return pushToast('Semua kolom wajib diisi!', 'error');
+          authLoading.value = true;
+          try {
+            const res = await gasRun('register', { success: true, data: { name: regForm.name, email: regForm.email } }, regForm);
+            if(res.success) {
+              user.value = res.data;
+              localStorage.setItem('lanz_user', JSON.stringify(res.data));
+              pushToast('Akun berhasil dibuat! Silakan bertransaksi.');
+              currentView.value = 'home';
+            }
+          } finally { authLoading.value = false; }
+        };
+
+        const handleLogout = () => {
+          user.value = null;
+          localStorage.removeItem('lanz_user');
+          pushToast('Berhasil keluar akun.');
+        };
+
+        const submitOrder = async () => {
+          if (!orderForm.userId || !orderForm.itemId || !orderForm.paymentCode || !orderForm.whatsapp) {
+            return pushToast('Mohon lengkapi semua data step 1 s/d 4!', 'error');
+          }
+          submitLoading.value = true;
+          try {
+            const activeItem = selectedGame.value.items.find(i => i.id === orderForm.itemId);
+            const activePayment = paymentMethods.value.flatMap(g => g.list).find(p => p.code === orderForm.paymentCode);
+            
+            const payload = {
+              invoiceId: 'INV-' + Date.now().toString().slice(-6).toUpperCase(),
+              gameTitle: selectedGame.value.title,
+              target: orderForm.userId + (orderForm.zoneId ? ` (${orderForm.zoneId})` : ''),
+              itemName: activeItem.name,
+              payment: activePayment.name,
+              total: activeItem.price + activePayment.fee,
+              status: 'PENDING'
+            };
+
+            const res = await gasRun('createTransaction', { success: true, data: payload }, orderForm);
+            if (res.success) {
+              trackedOrder.value = res.data;
+              trackInvoiceId.value = res.data.invoiceId;
+              pushToast('Pesanan dibuat! Mengalihkan ke halaman status...');
+              currentView.value = 'track';
+              
+              // Simulate real-time automated processing webhook
+              setTimeout(() => {
+                if (trackedOrder.value) {
+                  trackedOrder.value.status = 'SUCCESS';
+                  pushToast('Pembayaran Diterima! Top Up sukses diproses otomatis via API ⚡');
+                }
+              }, 4000);
+            }
+          } finally { submitLoading.value = false; }
+        };
+
+        const handleTrack = async () => {
+          if (!trackInvoiceId.value) return pushToast('Masukkan nomor invoice terlebih dahulu!', 'error');
+          trackLoading.value = true;
+          try {
+            // Simulated response logic fallback
+            const fallback = trackedOrder.value && trackedOrder.value.invoiceId === trackInvoiceId.value.toUpperCase() ? trackedOrder.value : {
+              invoiceId: trackInvoiceId.value.toUpperCase(),
+              gameTitle: 'Mobile Legends',
+              target: '82749102 (2194)',
+              itemName: '257 Diamonds',
+              payment: 'QRIS All Payment',
+              total: 62500,
+              status: 'SUCCESS'
+            };
+            const res = await gasRun('trackOrder', { success: true, data: fallback }, trackInvoiceId.value);
+            if (res.success) {
+              trackedOrder.value = res.data;
+              pushToast('Data invoice ditemukan.');
+            }
+          } finally { trackLoading.value = false; }
+        };
+
+        // Utility inline SVGs library
+        const icon = (name, size = 20) => {
+          const paths = {
+            zap: `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>`,
+            search: `<circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>`,
+            shield: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>`,
+            box: `<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>`,
+            star: `<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>`,
+            crosshair: `<circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line>`,
+            disc: `<circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle>`,
+            gamepad: `<rect x="2" y="6" width="20" height="12" rx="3"></rect><path d="M6 12h4M8 10v4M16 11h.01M18 13h.01"></path>`,
+            logout: `<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path>`,
+            'arrow-left': `<line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>`,
+            'check-circle': `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>`,
+            check: `<polyline points="20 6 9 17 4 12"></polyline>`,
+            alert: `<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>`,
+            loader: `<line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line>`
+          };
+          return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${paths[name] || ''}</svg>`;
+        };
+
+        const avatarSvg = (name, size = 32) => {
+          const init = name ? name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : 'GM';
+          return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" rx="10" fill="#06b6d4"/><text x="50%" y="54%" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="${size*0.4}" text-anchor="middle" dominant-baseline="middle">${init}</text></svg>`;
+        };
+
+        onMounted(() => {
+          const cached = localStorage.getItem('lanz_user');
+          if (cached) user.value = JSON.parse(cached);
+        });
+
+        return {
+          isPreview, currentView, authTab, searchQuery, user, games, paymentMethods, selectedGame, orderForm,
+          loginForm, regForm, authLoading, submitLoading, trackLoading, trackInvoiceId, trackedOrder, toasts,
+          isLoggedIn, filteredGames, formatRp, selectGame, calculateTotal, handleLogin, handleRegister, handleLogout,
+          submitOrder, handleTrack, icon, avatarSvg
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
