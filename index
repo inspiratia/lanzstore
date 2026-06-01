@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LanzStore - Platform Top Up Game Termurah & Tercepat</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            cyber: {
+              50: '#ecfeff', 100: '#cffafe', 500: '#06b6d4', 600: '#0891b2', 700: '#0e7490', 950: '#083344'
+            },
+            darkspace: '#0f172a',
+            surface: '#1e293b'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+    }
+    .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    /* Custom Neon Glows */
+    .neon-border:focus {
+      border-color: #06b6d4;
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+    }
+    .neon-card-active {
+      border-color: #06b6d4;
+      background: rgba(6, 182, 212, 0.08);
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+
+    /* Page Transitions */
+    .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+    .fade-enter-from, .fade-leave-to { opacity: 0; }
+  </style>
+</head>
+<body>
+
+  <div id="app" class="min-h-screen flex flex-col justify-between">
+    
+    <div class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full">
+      <TransitionGroup name="fade">
+        <div v-for="t in toasts" :key="t.id" 
+             class="p-4 rounded-xl border shadow-2xl flex items-center gap-3 backdrop-blur-md text-sm font-medium"
+             :class="t.type === 'error' ? 'bg-red-950/90 border-red-500 text-red-200' : 'bg-slate-900/90 border-cyber-500 text-cyan-200'">
+          <span v-html="icon(t.type === 'error' ? 'alert' : 'check', 18)"></span>
+          <span>{{ t.msg }}</span>
+        </div>
+      </TransitionGroup>
+    </div>
+
+    <header class="bg-surface/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 lg:px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <div @click="currentView = 'home'" class="flex items-center gap-2.5 cursor-pointer">
+          <div class="bg-gradient-to-tr from-cyber-600 to-cyan-400 p-2 rounded-xl text-darkspace shadow-lg shadow-cyber-500/20">
+            <span v-html="icon('zap', 24)"></span>
+          </div>
+          <div>
+            <h1 class="text-xl font-heading font-extrabold tracking-tight text-white">LANZ<span class="text-cyber-500">STORE</span></h1>
+            <p class="text-[10px] text-slate-400 tracking-wider font-semibold uppercase">Instant Gamers Provider</p>
+          </div>
+        </div>
+        
+        <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-slate-300">
+          <button @click="currentView = 'home'" :class="{'text-cyber-500': currentView === 'home'}" class="hover:text-cyber-400 transition">Beranda</button>
+          <button @click="currentView = 'track'" :class="{'text-cyber-500': currentView === 'track'}" class="hover:text-cyber-400 transition">Lacak Pesanan</button>
+        </nav>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div v-if="isLoggedIn" class="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800">
+          <div v-html="avatarSvg(user.name, 32)"></div>
+          <div class="hidden sm:block text-left">
+            <p class="text-xs font-bold text-slate-200 truncate w-24">{{ user.name }}</p>
+            <p class="text-[9px] text-cyber-500 uppercase font-bold">Gamers Member</p>
+          </div>
+          <button @click="handleLogout" class="text-slate-400 hover:text-red-400 p-1 rounded-lg transition" title="Keluar">
+            <span v-html="icon('logout', 16)"></span>
+          </button>
+        </div>
+        <button v-else @click="currentView = 'auth'" class="bg-cyber-500 hover:bg-cyber-600 text-darkspace font-bold text-sm px-5 py-2.5 rounded-xl transition shadow-lg shadow-cyber-500/10">
+          Masuk / Daftar
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8">
+      <Transition name="fade" mode="out-in">
+        
+        <div v-if="currentView === 'home'" class="space-y-8">
+          <div class="bg-gradient-to-r from-slate-900 via-surface to-slate-900 rounded-3xl p-6 lg:p-10 border border-slate-800 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="absolute -right-16 -bottom-16 opacity-10 text-cyber-500 pointer-events-none">
+              <span v-html="icon('gamepad', 300)"></span>
+            </div>
+            <div class="space-y-4 max-w-xl relative z-10">
+              <span class="bg-cyber-500/10 border border-cyber-500/20 text-cyber-400 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">⚡ Promo Ramadhan & Game Update</span>
+              <h2 class="text-2xl lg:text-4xl font-heading font-black text-white leading-tight">Top Up Game Favoritmu, Hitungan Detik Langsung Masuk!</h2>
+              <p class="text-sm text-slate-400">LanzStore menyediakan layanan isi ulang diamond, voucher, dan koin game terpercaya dengan payment gateway otomatis 24 jam terpopuler di Indonesia.</p>
+              
+              <div class="relative max-w-md">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none" v-html="icon('search', 18)"></span>
+                <input v-model="searchQuery" type="text" placeholder="Cari Game Favoritmu (misal: Mobile Legends)..." class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none focus:border-cyber-500 transition text-slate-200">
+              </div>
+            </div>
+            <div class="hidden md:grid grid-cols-2 gap-3 max-w-sm w-full">
+              <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 text-center">
+                <p class="text-xl font-heading font-extrabold text-cyber-500">10k+</p>
+                <p class="text-xs text-slate-400 mt-1">Transaksi Sukses</p>
+              </div>
+              <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 text-center">
+                <p class="text-xl font-heading font-extrabold text-amber-500">24/7</p>
+                <p class="text-xs text-slate-400 mt-1">Proses Otomatis</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-6 bg-cyber-500 rounded-full"></span>
+              <h3 class="text-lg font-heading font-bold text-white">Daftar Game Populer</h3>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div v-for="game in filteredGames" :key="game.id" 
+                   @click="selectGame(game)"
+                   class="bg-surface border border-slate-800 rounded-2xl p-4 flex flex-col items-center text-center cursor-pointer hover:border-cyber-500/60 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                <div class="w-20 h-20 bg-slate-950 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                  <div class="absolute inset-0 opacity-20 bg-gradient-to-br" :style="`from-color: ${game.color}`"></div>
+                  <span v-html="icon(game.icon, 40)" :style="`color: ${game.color}`"></span>
+                </div>
+                <h4 class="text-sm font-bold text-slate-200 group-hover:text-cyber-400 transition-colors line-clamp-1 w-full">{{ game.title }}</h4>
+                <p class="text-[10px] text-slate-400 mt-1 font-medium">{{ game.publisher }}</p>
+                <div class="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyber-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </div>
+            </div>
+            <div v-if="filteredGames.length === 0" class="text-center py-12 bg-surface rounded-2xl border border-slate-800 text-slate-400 text-sm">
+              Game yang kamu cari belum tersedia. Coba kata kunci lain! 🎮
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="currentView === 'topup' && selectedGame" class="space-y-6">
+          <button @click="currentView = 'home'" class="flex items-center gap-2 text-sm text-slate-400 hover:text-cyber-500 font-medium transition">
+            <span v-html="icon('arrow-left', 16)"></span> Kembali ke Beranda
+          </button>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            <div class="bg-surface border border-slate-800 rounded-2xl p-5 space-y-4 lg:sticky lg:top-24">
+              <div class="flex items-center gap-4 pb-4 border-b border-slate-800">
+                <div class="w-16 h-16 bg-slate-950 rounded-xl flex items-center justify-center flex-shrink-0" :style="`border: 2px solid ${selectedGame.color}`">
+                  <span v-html="icon(selectedGame.icon, 32)" :style="`color: ${selectedGame.color}`"></span>
+                </div>
+                <div>
+                  <h3 class="text-lg font-heading font-bold text-white">{{ selectedGame.title }}</h3>
+                  <p class="text-xs text-slate-400">{{ selectedGame.publisher }}</p>
+                </div>
+              </div>
+              <div class="text-xs text-slate-400 space-y-2 leading-relaxed">
+                <p class="font-bold text-slate-200">Cara Melakukan Top Up:</p>
+                <p>1. Masukkan data akun Game Anda (User ID & Zone ID).</p>
+                <p>2. Pilih nominal item/diamond yang diinginkan.</p>
+                <p>3. Pilih metode pembayaran yang paling praktis.</p>
+                <p>4. Masukkan nomor WhatsApp aktif untuk invoice.</p>
+                <p>5. Klik Beli Sekarang dan selesaikan pembayaran.</p>
+              </div>
+            </div>
+
+            <div class="lg:col-span-2 space-y-6">
+              
+              <div class="bg-surface border border-slate-800 rounded-2xl p-5 space-y-4">
+                <div class="flex items-center gap-3">
+                  <span class="w-7 h-7 bg-cyber-500 text-darkspace font-heading font-black text-sm rounded-xl flex items-center justify-center">1</span>
+                  <h4 class="font-heading font-bold text-white text-base">Lengkapi Data Akun Game</h4>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-xs font-semibold text-slate-400 mb-1.5 block">User ID / Game ID</label>
+                    <input v-model="orderForm.userId" type="text" placeholder="Masukkan ID Akun" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none neon-border text-slate-200">
+                  </div>
+                  <div v-if="selectedGame.hasZone">
+                    <label class="text-xs font-semibold text-slate-400 mb-1.5 block">Zone ID / Server</label>
+                    <input v-model="orderForm.zoneId" type="text" placeholder="(Contoh: 1234)" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none neon-border text-slate-200">
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface border border-slate-800 rounded-2xl p-5 space-y-4">
+                <div class="flex items-center gap-3">
+                  <span class="w-7 h-7 bg-cyber-500 text-darkspace font-heading font-black text-sm rounded-xl flex items-center justify-center">2</span>
+                  <h4 class="font-heading font-bold text-white text-base">Pilih Nominal Paket</h4>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div v-for="item in selectedGame.items" :key="item.id"
+                       @click="orderForm.itemId = item.id"
+                       :class="orderForm.itemId === item.id ? 'neon-card-active' : 'border-slate-800 bg-slate-950'"
+                       class="border rounded-xl p-4.5 text-left cursor-pointer hover:border-slate-700 transition relative overflow-hidden group">
+                    <p class="text-xs font-bold text-slate-200 group-hover:text-cyber-400 transition-colors">{{ item.name }}</p>
+                    <p class="text-sm font-black text-cyber-500 mt-2">{{ formatRp(item.price) }}</p>
+                    <span v-if="orderForm.itemId === item.id" class="absolute top-2 right-2 text-cyber-500" v-html="icon('check-circle', 16)"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface border border-slate-800 rounded-2xl p-5 space-y-4">
+                <div class="flex items-center gap-3">
+                  <span class="w-7 h-7 bg-cyber-500 text-darkspace font-heading font-black text-sm rounded-xl flex items-center justify-center">3</span>
+                  <h4 class="font-heading font-bold text-white text-base">Pilih Metode Pembayaran</h4>
+                </div>
+                <div class="space-y-4">
+                  <div v-for="group in paymentMethods" :key="group.category" class="space-y-2">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ group.category }}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div v-for="pay in group.list" :key="pay.code"
+                           @click="orderForm.paymentCode = pay.code"
+                           :class="orderForm.paymentCode === pay.code ? 'neon-card-active' : 'border-slate-800 bg-slate-950'"
+                           class="border rounded-xl p-3 flex items-center justify-between cursor-pointer hover:border-slate-700 transition">
+                        <div class="flex items-center gap-3">
+                          <div class="bg-slate-900 w-12 h-7 rounded flex items-center justify-center text-[10px] font-black border border-slate-800 text-slate-300">
+                            {{ pay.label }}
+                          </div>
+                          <div>
+                            <p class="text-xs font-bold text-slate-200">{{ pay.name }}</p>
+                            <p class="text-[10px] text-slate-400">Proses Instan otomatis</p>
+                          </div>
+                        </div>
+                        <p class="text-xs font-black text-slate-300">{{ formatRp(calculateTotal(pay.fee)) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface border border-slate-800 rounded-2xl p-5 space-y-4">
+                <div class="flex items-center gap-3">
+                  <span class="w-7 h-7 bg-cyber-500 text-darkspace font-heading font-black text-sm rounded-xl flex items-center justify-center">4</span>
+                  <h4 class="font-heading font-bold text-white text-base">Konfirmasi Kontak & Bayar</h4>
+                </div>
+                <div class="space-y-4">
+                  <div>
+                    <label class="text-xs font-semibold text-slate-400 mb-1.5 block">No. WhatsApp Aktif (Untuk Notifikasi Kuitansi)</label>
+                    <input v-model="orderForm.whatsapp" type="tel" placeholder="Contoh: 082141258456" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none neon-border text-slate-200">
+                  </div>
+                  
+                  <button @click="submitOrder" :disabled="submitLoading" class="w-full bg-gradient-to-r from-cyber-600 to-cyan-400 text-darkspace font-heading font-black text-base py-4 rounded-xl transition shadow-xl shadow-cyber-500/20 hover:brightness-110 flex justify-center items-center gap-2">
+                    <span v-if="submitLoading" class="animate-spin" v-html="icon('loader', 20)"></span>
+                    <span v-else>Beli & Bayar Sekarang ⚡</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="currentView === 'track'" class="max-w-xl mx-auto space-y-6">
+          <div class="bg-surface border border-slate-800 rounded-2xl p-6 text-center space-y-4 shadow-xl">
+            <div class="w-12 h-12 bg-cyber-500/10 border border-cyber-500/20 rounded-full flex items-center justify-center mx-auto text-cyber-500">
+              <span v-html="icon('search', 22)"></span>
+            </div>
+            <div>
+              <h3 class="text-lg font-heading font-bold text-white">Lacak Pesanan Instan</h3>
+              <p class="text-xs text-slate-400 mt-1">Masukkan Nomor Invoice untuk memeriksa status top-up kamu.</p>
+            </div>
+            
+            <div class="flex gap-2">
+              <input v-model="trackInvoiceId" type="text" placeholder="Contoh: INV-2026-001" class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm focus:outline-none neon-border text-slate-200 uppercase">
+              <button @click="handleTrack" :disabled="trackLoading" class="bg-cyber-500 hover:bg-cyber-600 text-darkspace font-bold px-5 py-3 rounded-xl transition text-sm flex items-center gap-1.5 flex-shrink-0">
+                <span v-if="trackLoading" class="animate-spin" v-html="icon('loader', 16)"></span>
+                <span v-else>Cari</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-if="trackedOrder" class="bg-surface border border-slate-800 rounded-2xl p-5 space-y-4 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-4 right-4 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider"
+                 :class="trackedOrder.status === 'SUCCESS' ? 'bg-emerald-950 border border-emerald-500/30 text-emerald-400' : 'bg-amber-950 border border-amber-500/30 text-amber-400'">
+              ● {{ trackedOrder.status }}
+            </div>
+            
+            <h4 class="font-heading font-bold text-white text-base">Detail Kuitansi Transaksi</h4>
+            <div class="border-t border-slate-800 pt-3 space-y-2 text-xs">
+              <div class="flex justify-between"><span class="text-slate-400">No. Invoice</span><span class="font-bold text-slate-200 uppercase">{{ trackedOrder.invoiceId }}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Game</span><span class="font-semibold text-slate-200">{{ trackedOrder.gameTitle }}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Target Akun</span><span class="font-semibold text-slate-200">{{ trackedOrder.target }}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Item Paket</span><span class="font-semibold text-cyber-400">{{ trackedOrder.itemName }}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Metode Bayar</span><span class="font-semibold text-slate-200 uppercase">{{ tr
